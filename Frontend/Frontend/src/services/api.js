@@ -1,3 +1,4 @@
+
 import axios from "axios";
 
 let accessToken = null;
@@ -6,8 +7,11 @@ export const setAccessToken = (token) => {
     accessToken = token;
 };
 
+const API_URL =
+    "https://full-mern-student-management-mu1h.vercel.app";
+
 const api = axios.create({
-    baseURL: "http://localhost:3001",
+    baseURL: API_URL,
     withCredentials: true
 });
 
@@ -31,21 +35,24 @@ api.interceptors.response.use(
 
         if (
             error.response?.status === 401 &&
+            originalRequest &&
             !originalRequest._retry &&
-            !originalRequest.url.includes("/auth/")
+            !originalRequest.url?.includes("/auth/")
         ) {
             originalRequest._retry = true;
 
             try {
                 if (!refreshPromise) {
                     refreshPromise = axios.post(
-                        "http://localhost:3001/auth/refresh",
+                        `${API_URL}/auth/refresh`,
                         {},
                         { withCredentials: true }
                     )
                     .then((response) => {
                         const newToken = response.data.accessToken;
+
                         setAccessToken(newToken);
+
                         return newToken;
                     })
                     .finally(() => {
